@@ -26,12 +26,16 @@ import (
 )
 
 // CustomArgs is used by the gengo framework to pass args specific to this generator.
-type CustomArgs struct{}
+type CustomArgs struct {
+	PluralExceptions []string
+}
 
 // NewDefaults returns default arguments for the generator.
 func NewDefaults() (*args.GeneratorArgs, *CustomArgs) {
 	genericArgs := args.Default().WithoutDefaultFlagParsing()
-	customArgs := &CustomArgs{}
+	customArgs := &CustomArgs{
+		PluralExceptions: []string{"Endpoints:Endpoints"},
+	}
 	genericArgs.CustomArgs = customArgs
 
 	if pkg := codegenutil.CurrentPackage(); len(pkg) != 0 {
@@ -42,7 +46,9 @@ func NewDefaults() (*args.GeneratorArgs, *CustomArgs) {
 }
 
 // AddFlags add the generator flags to the flag set.
-func (ca *CustomArgs) AddFlags(fs *pflag.FlagSet) {}
+func (ca *CustomArgs) AddFlags(fs *pflag.FlagSet) {
+	fs.StringArrayVar(&ca.PluralExceptions, "plural-exceptions", ca.PluralExceptions, "list of comma separated plural exception (eg. Endpoints:Endpoints")
+}
 
 // Validate checks the given arguments.
 func Validate(genericArgs *args.GeneratorArgs) error {
